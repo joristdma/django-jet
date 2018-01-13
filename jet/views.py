@@ -2,6 +2,7 @@ from django.views.decorators.http import require_POST, require_GET
 from jet.forms import AddBookmarkForm, RemoveBookmarkForm, ToggleApplicationPinForm, ModelLookupForm
 from jet.models import Bookmark
 from jet.utils import JsonResponse
+from django.contrib.admin.views.decorators import staff_member_required
 
 
 @require_POST
@@ -55,13 +56,19 @@ def toggle_application_pin_view(request):
 
 
 @require_GET
+@staff_member_required
 def model_lookup_view(request):
-    result = {'error': False}
+    from jet.forms import ModelLookupForm
+    from jet.utils import JsonResponse
+
+    result = {
+        'error': False
+    }
 
     form = ModelLookupForm(request, request.GET)
 
     if form.is_valid():
-        items, total = form.lookup()
+        items, total = form.lookup(request.user)
         result['items'] = items
         result['total'] = total
     else:
