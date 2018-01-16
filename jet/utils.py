@@ -129,7 +129,7 @@ def get_admin_site(context):
     # work in case of multiple admin sites. TODO.
     from django.conf import settings as django_settings
     from django.utils.module_loading import import_string
-    if getattr(django_settings, "JET_ADMIN_SITE"):
+    if hasattr(django_settings, 'JET_ADMIN_SITE'):
         return import_string(django_settings.JET_ADMIN_SITE)
 
     # Part 2 - Stock code.
