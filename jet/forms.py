@@ -133,8 +133,10 @@ class ModelLookupForm(forms.Form):
         if 'q' in self.cleaned_data:
 
             if hasattr(self.model_cls, 'autocomplete_search_fields') and hasattr(self.model_cls, 'autocomplete_search_query'):
-                raise NotImplementedError("The model " + str(self.model_cls) + " cannot have both "
-                                                                             "an autocomplete_search_fields and autocomplete_search_query function.")
+                raise NotImplementedError("The model {} cannot have both an "
+                                          "autocomplete_search_fields and "
+                                          "autocomplete_search_query function.".format(
+                                        str(self.model_cls)))
 
             elif hasattr(self.model_cls, 'autocomplete_search_query'):
                 qs = self.model_cls.autocomplete_search_query(self.cleaned_data['q'], user)
