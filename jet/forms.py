@@ -107,6 +107,8 @@ class ModelLookupForm(forms.Form):
         super(ModelLookupForm, self).__init__(*args, **kwargs)
 
     def clean(self):
+        from django.db.models import Q
+
         data = super(ModelLookupForm, self).clean()
 
         if not user_is_authenticated(self.request.user) or not self.request.user.is_staff:
@@ -118,9 +120,19 @@ class ModelLookupForm(forms.Form):
             raise ValidationError('error')
 
         content_type = ContentType.objects.get_for_model(self.model_cls)
-        permission = Permission.objects.filter(content_type=content_type, codename__startswith='change_').first()
 
-        if not self.request.user.has_perm('{}.{}'.format(data['app_label'], permission.codename)):
+        # User needs view or change permission on the object
+        permissions = Permission.objects.filter(Q(
+            codename__startswith='change_') | Q(
+            codename__startswith='view_'), content_type=content_type)
+
+        permission_granted = False
+        for permission in permissions:
+            if self.request.user.has_perm('{}.{}'.format(data['app_label'], permission.codename)):
+                permission_granted = True
+                break
+                
+        if not permission_granted:
             raise ValidationError('error')
 
         return data
