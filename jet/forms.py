@@ -131,7 +131,7 @@ class ModelLookupForm(forms.Form):
             if self.request.user.has_perm('{}.{}'.format(data['app_label'], permission.codename)):
                 permission_granted = True
                 break
-                
+
         if not permission_granted:
             raise ValidationError('error')
 
@@ -170,6 +170,9 @@ class ModelLookupForm(forms.Form):
             'id': instance.pk,
             'text': get_model_instance_label(instance)
         }, qs.all()[offset:offset + limit]))
-        total = qs.count()
 
-        return items, total
+        # Optional post-processing
+        if hasattr(self.model_cls, 'autocomplete_search_filter'):
+            items = self.model_cls.autocomplete_search_filter(items)
+
+        return items, len(items)
