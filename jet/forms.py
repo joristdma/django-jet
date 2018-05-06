@@ -166,13 +166,20 @@ class ModelLookupForm(forms.Form):
         page = self.cleaned_data['page'] or 1
         offset = (page - 1) * limit
 
+        qs = qs.all()[offset:offset + limit]
+
+        # Convert qs to list of items
+        items = list(qs)
+
+        # Optional post-processing
+        # Note: the qs gets converted into a list of items here
+        if hasattr(self.model_cls, 'autocomplete_search_filter'):
+            items = self.model_cls.autocomplete_search_filter(items)
+
+        # Return dict of id and text
         items = list(map(lambda instance: {
             'id': instance.pk,
             'text': get_model_instance_label(instance)
-        }, qs.all()[offset:offset + limit]))
-
-        # Optional post-processing
-        if hasattr(self.model_cls, 'autocomplete_search_filter'):
-            items = self.model_cls.autocomplete_search_filter(items)
+        }, items))
 
         return items, len(items)

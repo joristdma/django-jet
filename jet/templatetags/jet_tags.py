@@ -61,52 +61,52 @@ def jet_is_checkbox(field):
 
 @register.filter
 def jet_select2_lookups(field):
-    if hasattr(field, 'field') and \
-            (isinstance(field.field, ModelChoiceField) or isinstance(field.field, ModelMultipleChoiceField)):
+    if hasattr(field, 'field') and (isinstance(field.field, ModelChoiceField) or isinstance(field.field, ModelMultipleChoiceField)):
         qs = field.field.queryset
         model = qs.model
 
-        if getattr(model, 'autocomplete_search_fields', None) and getattr(field.field, 'autocomplete', True):
-            choices = []
-            app_label = model._meta.app_label
-            model_name = model._meta.object_name
+        if hasattr(model, 'autocomplete_search_fields') or hasattr(model, 'autocomplete_search_query'):
+            if getattr(field.field, 'autocomplete', True):
+                choices = []
+                app_label = model._meta.app_label
+                model_name = model._meta.object_name
 
-            attrs = {
-                'class': 'ajax',
-                'data-app-label': app_label,
-                'data-model': model_name,
-                'data-ajax--url': reverse('jet:model_lookup')
-            }
+                attrs = {
+                    'class': 'ajax',
+                    'data-app-label': app_label,
+                    'data-model': model_name,
+                    'data-ajax--url': reverse('jet:model_lookup')
+                }
 
-            initial_value = field.value()
+                initial_value = field.value()
 
-            if hasattr(field, 'field') and isinstance(field.field, ModelMultipleChoiceField):
-                if initial_value:
-                    initial_objects = model.objects.filter(pk__in=initial_value)
-                    choices.extend(
-                        [(initial_object.pk, get_model_instance_label(initial_object))
-                            for initial_object in initial_objects]
-                    )
+                if hasattr(field, 'field') and isinstance(field.field, ModelMultipleChoiceField):
+                    if initial_value:
+                        initial_objects = model.objects.filter(pk__in=initial_value)
+                        choices.extend(
+                            [(initial_object.pk, get_model_instance_label(initial_object))
+                                for initial_object in initial_objects]
+                        )
 
-                if isinstance(field.field.widget, RelatedFieldWidgetWrapper):
-                    field.field.widget.widget = SelectMultiple(attrs)
-                else:
-                    field.field.widget = SelectMultiple(attrs)
-                field.field.choices = choices
-            elif hasattr(field, 'field') and isinstance(field.field, ModelChoiceField):
-                if initial_value:
-                    try:
-                        initial_object = model.objects.get(pk=initial_value)
-                        attrs['data-object-id'] = initial_value
-                        choices.append((initial_object.pk, get_model_instance_label(initial_object)))
-                    except model.DoesNotExist:
-                        pass
+                    if isinstance(field.field.widget, RelatedFieldWidgetWrapper):
+                        field.field.widget.widget = SelectMultiple(attrs)
+                    else:
+                        field.field.widget = SelectMultiple(attrs)
+                    field.field.choices = choices
+                elif hasattr(field, 'field') and isinstance(field.field, ModelChoiceField):
+                    if initial_value:
+                        try:
+                            initial_object = model.objects.get(pk=initial_value)
+                            attrs['data-object-id'] = initial_value
+                            choices.append((initial_object.pk, get_model_instance_label(initial_object)))
+                        except model.DoesNotExist:
+                            pass
 
-                if isinstance(field.field.widget, RelatedFieldWidgetWrapper):
-                    field.field.widget.widget = Select(attrs)
-                else:
-                    field.field.widget = Select(attrs)
-                field.field.choices = choices
+                    if isinstance(field.field.widget, RelatedFieldWidgetWrapper):
+                        field.field.widget.widget = Select(attrs)
+                    else:
+                        field.field.widget = Select(attrs)
+                    field.field.choices = choices
 
     return field
 
