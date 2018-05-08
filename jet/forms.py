@@ -172,7 +172,6 @@ class ModelLookupForm(forms.Form):
         items = list(qs)
 
         # Optional post-processing
-        # Note: the qs gets converted into a list of items here
         if hasattr(self.model_cls, 'autocomplete_search_filter'):
             items = self.model_cls.autocomplete_search_filter(items)
 
