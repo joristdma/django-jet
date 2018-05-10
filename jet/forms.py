@@ -159,6 +159,9 @@ class ModelLookupForm(forms.Form):
                 filter_data = [Q((field + '__icontains', self.cleaned_data['q'])) for field in search_fields]
                 qs = qs.filter(reduce(operator.or_, filter_data))
 
+            else:
+                qs = self.model_cls.objects.none()
+
         else:
             qs = self.model_cls.objects.none()
 
@@ -166,7 +169,7 @@ class ModelLookupForm(forms.Form):
         page = self.cleaned_data['page'] or 1
         offset = (page - 1) * limit
 
-        qs = qs.all()[offset:offset + limit]
+        qs = qs[offset:offset + limit]
 
         # Convert qs to list of items
         items = list(qs)
