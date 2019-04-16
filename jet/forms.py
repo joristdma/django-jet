@@ -165,6 +165,8 @@ class ModelLookupForm(forms.Form):
         else:
             qs = self.model_cls.objects.none()
 
+        qs = qs.distinct()
+
         limit = self.cleaned_data['page_size'] or 100
         page = self.cleaned_data['page'] or 1
         offset = (page - 1) * limit
