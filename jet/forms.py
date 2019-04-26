@@ -171,10 +171,11 @@ class ModelLookupForm(forms.Form):
         page = self.cleaned_data['page'] or 1
         offset = (page - 1) * limit
 
-        qs = qs[offset:offset + limit]
+		# Get count
+		total = qs.count()
 
         # Convert qs to list of items
-        items = list(qs)
+        items = list(qs[offset:offset + limit])
 
         # Optional post-processing
         if hasattr(self.model_cls, 'autocomplete_search_filter'):
@@ -186,4 +187,4 @@ class ModelLookupForm(forms.Form):
             'text': get_model_instance_label(instance)
         }, items))
 
-        return items, len(items)
+        return items, total
