@@ -171,8 +171,8 @@ class ModelLookupForm(forms.Form):
         page = self.cleaned_data['page'] or 1
         offset = (page - 1) * limit
 
-		# Get count
-		total = qs.count()
+        # Get count
+        total = qs.count()
 
         # Convert qs to list of items
         items = list(qs[offset:offset + limit])
